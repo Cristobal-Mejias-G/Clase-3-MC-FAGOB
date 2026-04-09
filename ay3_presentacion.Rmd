@@ -452,7 +452,9 @@ ggplot(casen_proc %>% dplyr::filter(!is.na(ingreso)),
 
 ## Mega guía
 
-Ver: https://r4ds.hadley.nz/data-visualize.html
+Ver R for Data Science (2e): https://r4ds.hadley.nz/data-visualize.html
+
+Ver GGPLOT2: https://ggplot2.tidyverse.org/index.html
 
 Podrán encontrar sobre visualización y R.
 
