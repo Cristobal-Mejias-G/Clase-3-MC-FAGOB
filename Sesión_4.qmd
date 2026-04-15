@@ -1,0 +1,232 @@
+---
+title: "Sesión 4: Documentos dinámicos y Quarto"
+subtitle: "Métodos Cuantitativos para la Administración Pública"
+author: "Cristóbal Mejías"
+date: "17-04-2026"
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contenidos"
+    number-sections: true
+    theme: flatly
+    code-fold: false
+    self-contained: true
+---
+
+# ¿Por qué documentos dinámicos?
+
+En el trabajo cuantitativo, el flujo habitual consiste en correr código en R, copiar resultados a un procesador de texto, ajustar manualmente tablas y gráficos, y repetir el ciclo cada vez que algo cambia. Este proceso es lento, propenso a errores y dificulta la **reproducibilidad**: la capacidad de que cualquier persona pueda llegar exactamente a los mismos resultados a partir de los mismos datos y procedimientos.
+
+Los **documentos dinámicos** resuelven este problema al integrar en un solo archivo el texto, el código y los resultados del análisis. Si los datos cambian, el documento se actualiza automáticamente al renderizarlo.
+
+## Reproducibilidad
+
+La reproducibilidad es un principio central de la ciencia abierta. Un análisis es reproducible cuando:
+
+-   El código fuente está disponible y documentado.
+-   Los datos de entrada están accesibles o descritos con precisión.
+-   El entorno de trabajo (paquetes, versiones) está registrado.
+-   Cualquier persona puede llegar al mismo resultado siguiendo los mismos pasos.
+
+## Markdown vs. Quarto
+
+| Concepto | Descripción |
+|------------------------------------|------------------------------------|
+| **Markdown** | Lenguaje de texto plano con marcas mínimas de formato (`.md`). Solo texto y estructura. |
+| **R Markdown** | Extensión de Markdown que permite incluir código R ejecutable (`.Rmd`). Específico para R. |
+| **Quarto** | Sistema moderno y multilenguaje (R, Python, Julia) para documentos dinámicos (`.qmd`). Estándar actual del curso. |
+
+------------------------------------------------------------------------
+
+# Sintaxis de Markdown
+
+Todo el texto de un archivo `.qmd` se escribe en Markdown.
+
+| Código                     | Resultado             |
+|----------------------------|-----------------------|
+| `**negrita**`              | **negrita**           |
+| `*cursiva*`                | *cursiva*             |
+| `# Título 1`               | Encabezado de nivel 1 |
+| `## Título 2`              | Encabezado de nivel 2 |
+| `[texto](https://url.com)` | Enlace                |
+| `![alt](ruta/imagen.png)`  | Imagen                |
+| `> cita`                   | Bloque de cita        |
+| `- ítem`                   | Lista no ordenada     |
+| `1. ítem`                  | Lista ordenada        |
+
+------------------------------------------------------------------------
+
+# Chunks de código y sus opciones
+
+Un **chunk** es un bloque de código R que Quarto ejecuta al renderizar. Se inserta con `Ctrl+Alt+I`.
+
+## Opciones principales
+
+| Opción    | Descripción                                   |
+|-----------|-----------------------------------------------|
+| `echo`    | Muestra u oculta el código fuente             |
+| `eval`    | Ejecuta o no el código                        |
+| `output`  | Incluye o excluye los resultados              |
+| `warning` | Muestra u oculta advertencias                 |
+| `message` | Muestra u oculta mensajes de carga            |
+| `include` | Control global: suprime código y resultados   |
+| `label`   | Identifica el chunk para referencias cruzadas |
+| `fig-cap` | Título para gráficos (`label: fig-...`)       |
+| `tbl-cap` | Título para tablas (`label: tbl-...`)         |
+
+### Referencias cruzadas
+
+Cuando asignamos un `label` a un chunk, podemos citarlo en el texto con `@`:
+
+-   Tablas: `#| label: tbl-nombre` → referencia con `@tbl-nombre`
+-   Gráficos: `#| label: fig-nombre` → referencia con `@fig-nombre`
+
+------------------------------------------------------------------------
+
+# De Documento a Presentación
+
+Una ventaja clave de Quarto es que **el mismo archivo puede convertirse en distintos formatos** simplemente cambiando el YAML.
+
+## Cambiar el formato
+
+**Documento HTML:**
+
+``` yaml
+format: html
+```
+
+**Presentación RevealJS:**
+
+``` yaml
+format: revealjs
+```
+
+## Separar diapositivas
+
+Los encabezados `#` y `##` crean diapositivas automáticamente. También se puede usar `---` para separar manualmente:
+
+``` markdown
+## Primera diapositiva
+
+Contenido aquí.
+
+---
+
+Nueva diapositiva sin título.
+```
+
+## Opciones útiles de RevealJS
+
+``` yaml
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    incremental: true
+```
+
+------------------------------------------------------------------------
+
+# Aplicación práctica: Estatus Social Subjetivo
+
+## Preparación
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+
+library(pacman)
+pacman::p_load(tidyverse, dplyr, sjmisc, sjPlot, ggplot2, kableExtra, parameters)
+
+options(scipen = 999)
+rm(list = ls())
+```
+
+## Carga de datos
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+
+load(url("https://github.com/cursos-metodos-facso/datos-ejemplos/raw/main/issp_2009_chile.RData"))
+
+names(issp)
+glimpse(issp)
+```
+
+## Tabla descriptiva
+
+```{r}
+#| echo: true
+#| warning: false
+#| label: tbl-desc
+#| tbl-cap: "Estadísticos descriptivos de variables seleccionadas"
+
+sjmisc::descr(issp,
+      show = c("label","range", "mean", "sd", "NA.prc", "n"))%>% # Selecciona estadísticos
+      kable(.,"markdown") # Esto es para que se vea bien en quarto
+
+```
+
+La @tbl-desc resume el estatus social subjetivo promedio por país.
+
+## Modelo de regresión lineal
+
+```{r}
+#| echo: true
+#| warning: false
+
+modelo_1 <- lm(topbot ~ educyrs,          data = issp)
+modelo_2 <- lm(topbot ~ educyrs + income, data = issp)
+```
+
+## Tabla de regresión con sjPlot
+
+```{r}
+#| echo: true
+#| warning: false
+#| label: tbl-reg
+#| tbl-cap: "Modelos de regresión: Estatus Social Subjetivo"
+
+sjPlot::tab_model(
+  modelo_1, modelo_2,
+  show.ci     = FALSE,
+  show.se     = TRUE,
+  dv.labels   = c("Modelo 1", "Modelo 2"),
+  pred.labels = c("(Intercepto)", "Educación (nivel educativo)", "Ingreso (decíles"),
+  title       = "Variable dependiente: Estatus Social Subjetivo (1–10)"
+)
+```
+
+## Visualización
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#| label: fig-ess
+#| fig-cap: "Relación entre educación y estatus social subjetivo"
+
+ggplot(issp, aes(x = educyrs, y = topbot)) +
+  geom_jitter(alpha = 0.2, color = "#3498db", width = 0.3, height = 0.3) +
+  geom_smooth(method = "lm", se = TRUE, color = "#e74c3c", linewidth = 1.2) +
+  labs(
+    title   = "Estatus social subjetivo según nivel educativo",
+    x       = "Educación (nivel educativo)",
+    y       = "Estatus social subjetivo (1–10)",
+    caption = "Fuente: Elaboración propia en base a ISSP."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+La @fig-ess muestra la asociación positiva entre años de escolaridad y el estatus percibido.
+
+------------------------------------------------------------------------
+
+*Documento interno · MC FAGOB 2026 · Cristóbal Mejías*\
+*Sesión 4 · 17 de abril de 2026*
