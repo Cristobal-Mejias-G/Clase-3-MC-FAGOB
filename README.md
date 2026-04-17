@@ -1,7 +1,4 @@
 
-🔗 Link: [Ver Clase 3](https://cristobal-mejias-g.github.io/Clase-3-MC-FAGOB/ay3_presentacion.html)  
-
-
 # Ayúdantía 3: Análisis descriptivo, bivariado y gráficos
 ## Curso: Métodos Cuantitativos para la Administración Pública. Profesor: Carlos Budnevich
 ### Ayudante: Cristóbal Mejías
